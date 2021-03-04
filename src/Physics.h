@@ -2,6 +2,15 @@
 #include <stdlib.h>
 #include <math.h>
 
+#ifndef ENTITIES
+#define ENTITIES
+#include "Entities.h"
+#endif
+
+// PHYSICS FUNCTIONS
+
+void CalculatePlayerPosition (Player* player, float t);
+
 // Triangle collision check
 float TSign (float x1, float y1, float x2, float y2, float x3, float y3);
 

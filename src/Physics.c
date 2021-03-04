@@ -2,8 +2,40 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "Entities.h"
+#ifndef PHYSICS
+#define PHYSICS
 #include "Physics.h"
+#endif
+
+#ifndef ENTITIES
+#define ENTITIES
+#include "Entities.h"
+#endif
+
+// PHYSICS FUNCTIONS
+
+/*
+void ApplyForceToPlayer (Player* player, ) {
+    player->vx += player->ax * t;
+    player->vy += player->ay * t + GRAVITY_Y;
+    player->x  += player->vx * t;
+    player->y  += player->vy * t;
+}
+
+*/
+void CalculatePlayerPosition (Player* player, float t) {
+    player->vx += player->ax * t;
+    player->vy += player->ay * t + GRAVITY_Y;
+    player->x  += player->vx * t;
+    player->y  += player->vy * t;
+
+/*
+    if (player->y >= WINDOW_HEIGHT - FLOOR_HEIGHT - 3 * player->r)
+        player->y = WINDOW_HEIGHT - FLOOR_HEIGHT - 3 * player->r;
+        */
+}
+
+// COLLISION FUNCTIONS
 
 // Triangle collision check
 float TSign (float x1, float y1, float x2, float y2, float x3, float y3) {
@@ -44,10 +76,11 @@ int PlayerCollisionCheck (Player* player, EntityHandler* entities) {
             if (PointInsideTriangle(player->x, player->y, entities->triangles[block]))
                 return 1;
 
+        /*
         if (entities->rectangles[block] != NULL)
             if (PointInsideRectangle(player->x, player->y, entities->rectangles[block]))
                 return 1;
-
+        */
         if (entities->circles[block] != NULL)
             if (PointInsideCircle(player->x, player->y, entities->circles[block]))
                 return 1;

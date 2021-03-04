@@ -3,13 +3,15 @@
 #define GAME_FPS 120 // Refresh rate of the game, in FPS
 #define WINDOW_WIDTH 1920 // Game window width, in pixels
 #define WINDOW_HEIGHT 1080 // Game window height, in pixels
-#define CHUNK_SIZE 100 // Chunk size, in blocks
-#define CHUNK_BORDER_SIZE 10 // Chunk border size, in blocks
+#define CHUNK_SIZE 500 // Chunk size, in blocks
+#define CHUNK_BORDER_SIZE 15 // Chunk border size, in blocks
+#define STRUCTURE_SIZE 10 // Maximum size of fundamental game structures, in blocks
 #define BLOCK_SIZE 150 // Block size, in pixels
-#define ENTITY_X_DISPLACEMENT 15 // Entity displacement in the X axis, in pixels
+#define ENTITY_X_DISPLACEMENT 10 // Entity displacement in the X axis, in pixels
 #define FLOOR_HEIGHT 0 // Height of the floor, in pixels
 #define ENTITY_HEIGHT 50 // Height of entities, in pixels
 #define RANDOM_SEED 12039102 // Random number seed
+#define GRAVITY_Y 1.79
 
 #endif
 
@@ -19,11 +21,18 @@
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_primitives.h>
 
+#ifndef CHUNKS
+#define CHUNKS
+#include "Chunks.h"
+#endif
+
 // ------------
 
 typedef struct Player {
-    
     float x, y, r;
+    float vx, vy;
+    float ax, ay;
+    float m;
     ALLEGRO_COLOR color;
 } Player;
 
@@ -38,7 +47,6 @@ void RenderPlayer (Player* player, float x, float y);
 // ------------
 
 typedef struct Background {
-
     float r, g, b;
     ALLEGRO_COLOR color;
 } Background;
@@ -67,14 +75,6 @@ typedef struct Circle {
     float cx, cy, r;
     ALLEGRO_COLOR color;
 } Circle;
-
-typedef struct Chunk {
-    unsigned char triangles[CHUNK_SIZE];
-    unsigned char rectangles[CHUNK_SIZE];
-    unsigned char circles[CHUNK_SIZE];
-} Chunk;
-
-Chunk* GenerateChunk (unsigned int seed);
 
 // ------------
 

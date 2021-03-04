@@ -4,7 +4,15 @@
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_primitives.h>
 
+#ifndef CHUNKS
+#define CHUNKS
+#include "Chunks.h"
+#endif
+
+#ifndef ENTITIES
+#define ENTITIES
 #include "Entities.h"
+#endif
 
 // ------------
 
@@ -15,6 +23,11 @@ Player* InitializePlayer () {
     player->x = WINDOW_WIDTH / 3;
     player->y = WINDOW_HEIGHT / 2;
     player->r = 30;
+    player->vx = 0;
+    player->vy = 0;
+    player->ax = 0;
+    player->ay = 0;
+    player->m = 1.5;
     player->color = al_map_rgb(0, 0, 0);
 
     return player;
@@ -25,6 +38,8 @@ void RenderPlayer (Player* player, float x, float y) {
     // Update player position
     player->x = x;
     player->y = y;
+    player->ax = 0;
+    player->ay = 0;
     player->color = al_map_rgb(255, 255, 255);
 
     // Render player
@@ -58,86 +73,6 @@ void UpdateBackground (Background* background) {
     al_clear_to_color(al_map_rgb(background->r, background->g, background->b));
 }
 
-// ------------
-
-// Chunk types & functions
-
-// ------------
-
-Chunk* GenerateChunk (unsigned int seed) {
-
-    Chunk* chunk = malloc(sizeof(Chunk));
-
-    int block = 0;
-
-    while (block < CHUNK_SIZE) {
-
-        // Random structures
-        int structure = rand() % 4;
-
-        // There is always a flat region on the beginning / end of the chunks
-        if ((block < CHUNK_BORDER_SIZE) || (block >= CHUNK_SIZE - CHUNK_BORDER_SIZE))
-            structure = 0;
-
-        switch (structure) {
-           
-            // Plain area
-            case 0:
-                for (int i = block; i < block + 5; i++) {
-                    chunk->triangles[i] = 0;
-                    chunk->rectangles[i] = 0;
-                    chunk->circles[i] = 0;
-                }
-                block += 5;
-                break;
-
-            // Spikes
-            case 1:
-                for (int i = block; i < block + 5; i++) {
-                    chunk->triangles[i] = 1;
-                    chunk->rectangles[i] = 0;
-                    chunk->circles[i] = 0;
-                }
-                block += 5;
-                break;
-
-            // Rectangles
-            case 2:
-                for (int i = block; i < block + 5; i++) {
-                    chunk->triangles[i] = 0;
-                    chunk->rectangles[i] = 1;
-                    chunk->circles[i] = 0;
-                }
-                block += 5;
-                break;
-
-            // Circles
-            case 3:
-                for (int i = block; i < block + 5; i++) {
-                    chunk->triangles[i] = 0;
-                    chunk->rectangles[i] = 0;
-                    chunk->circles[i] = 1;
-                }
-                block += 5;
-                break;
-
-            // Plain area (default)
-            default:
-                for (int i = block; i < block + 5; i++) {
-                    chunk->triangles[i] = 0;
-                    chunk->rectangles[i] = 0;
-                    chunk->circles[i] = 0;
-                }
-                block += 5;
-                break;
-        }
-    }
-
-    return chunk;
-}
-
-// ------------
-
 // Entity types & functions
 
 // ------------
@@ -162,7 +97,7 @@ EntityHandler* InitializeEntities (Chunk* chunk) {
             triangle->x3 = block * BLOCK_SIZE + (BLOCK_SIZE / 2);
             triangle->y3 = WINDOW_HEIGHT - 2 * (FLOOR_HEIGHT + ENTITY_HEIGHT);
 
-            triangle->color = al_map_rgb(rand() % 255, rand() % 255, rand() % 255);
+            triangle->color = al_map_rgb(/*rand() % */255, /*rand() % */255, /*rand() % */255);
         }
 
         // Initialize rectangles
@@ -173,11 +108,12 @@ EntityHandler* InitializeEntities (Chunk* chunk) {
             Rectangle* rectangle = entities->rectangles[block];
             
             rectangle->x1 = block * BLOCK_SIZE;
-            rectangle->y1 = WINDOW_HEIGHT - FLOOR_HEIGHT;
             rectangle->x2 = (block * BLOCK_SIZE) + BLOCK_SIZE;
-            rectangle->y2 = WINDOW_HEIGHT - (FLOOR_HEIGHT + ENTITY_HEIGHT);
 
-            rectangle->color = al_map_rgb(rand() % 255, rand() % 255, rand() % 255);
+            rectangle->y1 = (WINDOW_HEIGHT - FLOOR_HEIGHT) - ((chunk->rectangles[block] - 1) * WINDOW_HEIGHT / 20);
+            rectangle->y2 = (WINDOW_HEIGHT - WINDOW_HEIGHT / 20) - ((chunk->rectangles[block] - 1) * WINDOW_HEIGHT / 20);
+
+            rectangle->color = al_map_rgb(/*rand() % */255, /*rand() % */255, /*rand() % */255);
         }
 
         // Initialize circles
@@ -189,7 +125,7 @@ EntityHandler* InitializeEntities (Chunk* chunk) {
             
             circle->cx = block * BLOCK_SIZE + (BLOCK_SIZE / 2);
             circle->cy = rand() % WINDOW_HEIGHT;
-            circle->r  = ENTITY_HEIGHT;
+            circle->r  = ENTITY_HEIGHT + (rand() % 2 * ENTITY_HEIGHT);
 
             circle->color = al_map_rgb(rand() % 255, rand() % 255, rand() % 255);
         }

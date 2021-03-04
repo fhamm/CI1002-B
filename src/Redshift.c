@@ -4,8 +4,20 @@
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_primitives.h>
 
-#include "Entities.h"
+#ifndef CHUNKS
+#define CHUNKS
+#include "Chunks.h"
+#endif
+
+#ifndef PHYSICS
+#define PHYSICS
 #include "Physics.h"
+#endif
+
+#ifndef ENTITIES
+#define ENTITIES
+#include "Entities.h"
+#endif
 
 void InitializeModule(bool test, const char *description) {
     if (test) 
@@ -102,9 +114,7 @@ int main() {
         }
 
         if (redraw && al_is_event_queue_empty(queue)) {
-
-            
-            
+ 
             // This is where things are rendered
             UpdateBackground(background);
             
@@ -113,6 +123,8 @@ int main() {
                 entities = InitializeEntities(chunk);
             }
 
+            CalculatePlayerPosition(player, al_get_time());
+            //RenderPlayer(player, player->x, player->y);
             RenderPlayer(player, mouseX, mouseY);
 
             RenderEntities(entities);
