@@ -6,6 +6,8 @@
 #include <allegro5/allegro_ttf.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_audio.h>
+#include <allegro5/allegro_acodec.h>
 
 
 #ifndef CHUNKS
@@ -55,6 +57,11 @@ int main() {
     InitializeModule(disp, "display");
     al_set_window_title(disp, "Redshift");
 
+    // Initialize sound
+    InitializeModule(al_install_audio(), "audio");
+    InitializeModule(al_init_acodec_addon(), "audio codecs");
+    InitializeModule(al_reserve_samples(16), "reserve samples");
+
     // Initialize image addon
     InitializeModule(al_init_image_addon(), "image addon");
 
@@ -93,12 +100,17 @@ int main() {
     //float lastTimestamp = 0;
     ALLEGRO_EVENT event;
     //int mouseX, mouseY;
-
+    
     // Generate level
     Background* background = InitializeBackground();
     Player* player = InitializePlayer();
     Chunk* chunk = GenerateChunk(time(NULL));
     EntityHandler* entities = InitializeEntities(chunk);
+
+    // Sound
+    ALLEGRO_SAMPLE* backgroundMusic = al_load_sample("resources/sounds/main-music.wav");
+    InitializeModule(backgroundMusic, "backgroundMusic");
+    al_play_sample(backgroundMusic, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
 
     // Keyboard stuff
     #define KEY_SEEN     1
@@ -196,7 +208,8 @@ int main() {
         if (done) {
             
             printf("Finishing game...\n");
-
+            
+            al_destroy_sample(backgroundMusic);
             FreeBackground(background);
             free(player);
             free(chunk);
