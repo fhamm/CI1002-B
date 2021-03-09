@@ -25,7 +25,6 @@ void Struct_PlainArea (int* block, Chunk* chunk) {
         chunk->triangles[i] = 0;
         chunk->rectangles[i] = 1;
         chunk->circles[i] = 0;
-
     }
 
     *block = i;
@@ -50,7 +49,6 @@ void Struct_StairsUp (int* block, Chunk* chunk) {
     *block = i;
 }
 
-// FIX THIS
 void Struct_StairsDown (int* block, Chunk* chunk) {
 
     int i;
@@ -105,6 +103,28 @@ void Struct_Spikes (int* block, Chunk* chunk) {
     *block = i;
 }
 
+void Struct_ElevatedSpikes (int* block, Chunk* chunk) {
+
+    int i;
+
+    for (i = *block; (i < *block + STRUCTURE_SIZE) && (i < CHUNK_SIZE); i++) {
+        
+        if (i % 2 == 0) {
+            chunk->rectangles[i] = 9;
+            chunk->triangles[i] = 0;
+        }
+        else {
+            chunk->rectangles[i] = 0;
+            chunk->triangles[i] = 9;
+        }
+
+        chunk->circles[i] = 0;
+    }
+
+    *block = i;
+
+}
+
 // ------------
 
 // Chunk functions
@@ -113,23 +133,36 @@ void Struct_Spikes (int* block, Chunk* chunk) {
 
 Chunk* GenerateChunk (unsigned int seed) {
 
+    // Set randomness and allocate memory
     srand(seed);
-
     Chunk* chunk = malloc(sizeof(Chunk));
 
-    int block = 0;
-
-    StructFunction *StructList[5] = {
-        Struct_PlainArea,
-        Struct_StairsUp,
-        Struct_StairsDown,
-        Struct_ElevatedFloor,
-        Struct_Spikes
+    // This is the jump table (array of pointers) for the structure functions
+    StructFunction *StructList[6] = {
+        Struct_PlainArea, // 0
+        Struct_StairsUp, // 1
+        Struct_StairsDown, // 2
+        Struct_ElevatedFloor, // 3
+        Struct_Spikes, // 4
+        Struct_ElevatedSpikes // 5
     };
 
-    while (block < CHUNK_SIZE) {
+    // This is the constraint table.
+    // It basically tells which structures (columns) are allowed to be placed
+    // after a specific structure (row)
+    int ConstraintTable[6][6] = {
+        {0, 1, 4, -1, -1}, // 0
+        {0, 3, 5,-1, -1}, // 1
+        {0, 1, 4, -1, -1}, // 2
+        {0, 2, 3, 5,  -1}, // 3
+        {0, 1, 4, -1, -1}, // 4
+        {0, 2, 3,  5, -1}  // 5
+    };
 
-        int structure = rand() % 5;
+    // Generate chunk,
+    int block = 0;
+    int structure = 0;
+    while (block < CHUNK_SIZE) {
 
         // There is always a flat region on the beginning / end of the chunks
         if ((block < CHUNK_BORDER_SIZE) || (block >= CHUNK_SIZE - CHUNK_BORDER_SIZE))
@@ -138,9 +171,13 @@ Chunk* GenerateChunk (unsigned int seed) {
         // Generate terrain based on random structure
         StructList[structure](&block, chunk);
 
-        if (structure == 1)
-            StructList[3](&block, chunk);
+        // Find next valid structure randomly
+        int nextStructure = -1;
+        while (nextStructure == -1) {
+            nextStructure = ConstraintTable[structure][rand() % 6];
+        }
 
+        structure = nextStructure;
     }
 
     return chunk;

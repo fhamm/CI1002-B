@@ -14,25 +14,50 @@
 
 // PHYSICS FUNCTIONS
 
-/*
-void ApplyForceToPlayer (Player* player, ) {
-    player->vx += player->ax * t;
-    player->vy += player->ay * t + GRAVITY_Y;
-    player->x  += player->vx * t;
-    player->y  += player->vy * t;
-}
+void UpdatePlayerPhysics (Player* player, EntityHandler* entities, float t, int frameCount) {
 
-*/
-void CalculatePlayerPosition (Player* player, float t) {
-    player->vx += player->ax * t;
-    player->vy += player->ay * t + GRAVITY_Y;
-    player->x  += player->vx * t;
-    player->y  += player->vy * t;
+    // This is where all the physical interactions between the player and the entities
+    // are processed. This was, easily, the hardest thing to develop in this game.
+    
+    int playerBlock = ((ENTITY_X_DISPLACEMENT * frameCount) / BLOCK_SIZE) + PLAYER_START_BLOCK;
+    float gravity_y = 0.4;
+    float jumpHeight = 40;
 
-/*
-    if (player->y >= WINDOW_HEIGHT - FLOOR_HEIGHT - 3 * player->r)
-        player->y = WINDOW_HEIGHT - FLOOR_HEIGHT - 3 * player->r;
-        */
+    // Update physical properties
+    player->ay = gravity_y;
+    player->vx += player->ax;
+    player->vy += player->ay;
+    player->x  += player->vx;
+    player->y  += player->vy;
+
+    // Interactions with rectangles
+    if (entities->rectangles[playerBlock] != NULL) {
+
+        // For testing purposes
+        player->color = entities->rectangles[playerBlock]->color;
+
+        // Calculate distances
+        float localFloorHeight = entities->rectangles[playerBlock]->y2;   
+        //float verticalDistance = round(localFloorHeight - player->y);
+        float displacement = player->y - round(localFloorHeight - player->r);
+
+        if (displacement >= 0) {
+            
+            // Contact force (normal), where the resultant force is null
+            if (displacement <= 50 && entities->rectangles[playerBlock]->jump == 0) {
+                player->ay = 0;
+                player->vy = 0;
+                player->y = round(localFloorHeight - player->r);
+            }
+
+            // Jumping
+            if ((entities->rectangles[playerBlock]->jump == 1 || player->jumping == 1) && (player->y <= localFloorHeight)) {
+                player->vy = -jumpHeight * gravity_y;
+            }
+        }
+
+        //printf("block = %d jumpable = %d frame = %d vy = %f LocalFloor = %f VD = %f PlayerY = %f jumping = %d displacement = %f\n", playerBlock, entities->rectangles[playerBlock]->jump,frameCount, player->vy, localFloorHeight, verticalDistance, player->y, player->jumping, displacement);
+    }
 }
 
 // COLLISION FUNCTIONS
@@ -71,20 +96,22 @@ int PointInsideCircle (float x, float y, Circle* circle) {
 int PlayerCollisionCheck (Player* player, EntityHandler* entities) {
 
     for (int block = 0; block < CHUNK_SIZE; block++) {
-
+        
+        // Detect collision with triangle block
         if (entities->triangles[block] != NULL)
             if (PointInsideTriangle(player->x, player->y, entities->triangles[block]))
                 return 1;
-
-        /*
-        if (entities->rectangles[block] != NULL)
-            if (PointInsideRectangle(player->x, player->y, entities->rectangles[block]))
-                return 1;
-        */
+        
+        // Detect collision with circle block
         if (entities->circles[block] != NULL)
             if (PointInsideCircle(player->x, player->y, entities->circles[block]))
                 return 1;
     }
 
     return 0;
+}
+
+// Check if player is out of bounds
+int PlayerOutOfBounds (Player* player) {
+    return (player->y >= WINDOW_HEIGHT + player->r);
 }

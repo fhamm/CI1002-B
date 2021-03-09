@@ -4,8 +4,20 @@
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
 
+// Render points
+
+void RenderScore (float score);
+
+// Menu functions
+
 void RenderStartMenu (float timestamp);
 
 void RenderHelpMenu ();
 
 void RenderGameOverMenu (float score);
+
+// Leaderboard functions
+
+int WriteScoreToLeaderboard (float score);
+
+int LeaderboardHighScores (float* first, float* second, float* third);
