@@ -57,6 +57,8 @@ int main() {
     InitializeModule(queue, "queue");
 
     // Initialize display
+    if (WINDOW_FULLSCREEN)
+        al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
     ALLEGRO_DISPLAY *disp = al_create_display(WINDOW_WIDTH, WINDOW_HEIGHT);
     InitializeModule(disp, "display");
     al_set_window_title(disp, "Redshift");

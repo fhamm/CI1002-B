@@ -3,6 +3,7 @@
 #define GAME_FPS 60 // Refresh rate of the game, in FPS
 #define WINDOW_WIDTH 1920 // Game window width, in pixels
 #define WINDOW_HEIGHT 1080 // Game window height, in pixels
+#define WINDOW_FULLSCREEN 0 // Game fullscreen option, in boolean
 #define CHUNK_SIZE 500 // Chunk size, in blocks
 #define CHUNK_BORDER_SIZE 15 // Chunk border size, in blocks
 #define STRUCTURE_SIZE 10 // Maximum size of fundamental game structures, in blocks
