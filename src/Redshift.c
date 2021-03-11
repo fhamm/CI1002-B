@@ -57,7 +57,7 @@ int main() {
     InitializeModule(queue, "queue");
 
     // Initialize display
-    if (WINDOW_FULLSCREEN)
+    if (WINDOW_FULLSCREEN != 0)
         al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
     ALLEGRO_DISPLAY *disp = al_create_display(WINDOW_WIDTH, WINDOW_HEIGHT);
     InitializeModule(disp, "display");
