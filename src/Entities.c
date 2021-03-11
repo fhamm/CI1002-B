@@ -6,13 +6,13 @@
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
 
-#ifndef CHUNKS
-#define CHUNKS
+#ifndef __CHUNKS__
+#define __CHUNKS__
 #include "Chunks.h"
 #endif
 
-#ifndef ENTITIES
-#define ENTITIES
+#ifndef __ENTITIES__
+#define __ENTITIES__
 #include "Entities.h"
 #endif
 
@@ -249,8 +249,9 @@ void RenderEntities (EntityHandler* entities) {
         Triangle* triangle = entities->triangles[block];
         
         if (triangle != NULL) {
-            //al_draw_bitmap(triangle->image, triangle->x1, triangle->y3, 0);
-            al_draw_filled_triangle(triangle->x1, triangle->y1, triangle->x2, triangle->y2, triangle->x3, triangle->y3, triangle->color);
+            if ((triangle->x2 >= 0) && (triangle->x1 <= WINDOW_WIDTH))
+                al_draw_bitmap(triangle->image, triangle->x1, triangle->y3, 0);
+                //al_draw_filled_triangle(triangle->x1, triangle->y1, triangle->x2, triangle->y2, triangle->x3, triangle->y3, triangle->color);
         }
     }
 
@@ -260,8 +261,9 @@ void RenderEntities (EntityHandler* entities) {
         Rectangle* rectangle = entities->rectangles[block];
         
         if (rectangle != NULL) {
-            //al_draw_bitmap(rectangle->image, rectangle->x1, rectangle->y2, 0);
-            al_draw_filled_rectangle(rectangle->x1, rectangle->y1, rectangle->x2, rectangle->y2, rectangle->color);  
+            if ((rectangle->x2 >= 0) && (rectangle->x1 <= WINDOW_WIDTH))
+                al_draw_bitmap(rectangle->image, rectangle->x1, rectangle->y2, 0);
+                //al_draw_filled_rectangle(rectangle->x1, rectangle->y1, rectangle->x2, rectangle->y2, rectangle->color);  
         }
     }
 
@@ -271,8 +273,9 @@ void RenderEntities (EntityHandler* entities) {
         Circle* circle = entities->circles[block];
 
         if (circle != NULL) {
-            //al_draw_bitmap(circle->image, circle->cx - circle->r, circle->cy - circle->r, 0);
-            al_draw_filled_circle(circle->cx, circle->cy, circle->r, circle->color); 
+            if ((circle->cx + circle->r >= 0) && (circle->cx - circle->r <= WINDOW_WIDTH))
+                al_draw_bitmap(circle->image, circle->cx - circle->r, circle->cy - circle->r, 0);
+                //al_draw_filled_circle(circle->cx, circle->cy, circle->r, circle->color); 
         }
     }
 }
@@ -306,15 +309,18 @@ void FreeEntities (EntityHandler* entities) {
 int ClearSector (EntityHandler* entities, Chunk* chunk) {
 
     for (int block = 0; block < CHUNK_SIZE; block++) {
-
+        
+        // Check if there are any triangles still in player view 
         if (entities->triangles[block] != NULL)
             if (entities->triangles[block]->x2 >= 0)
                 return 0;
 
+        // Check if there are any rectangles still in player view 
         if (entities->rectangles[block] != NULL)
             if (entities->rectangles[block]->x2 >= 0)
                 return 0;
 
+        // Check if there are any circles still in player view 
         if (entities->circles[block] != NULL)
             if (entities->circles[block]->cx >= 0)
                 return 0;

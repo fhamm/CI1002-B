@@ -1,28 +1,31 @@
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
- #include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_ttf.h>
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_primitives.h>
 
-#ifndef ENTITIES
-#define ENTITIES
+#ifndef __ENTITIES__
+#define __ENTITIES__
 #include "Entities.h"
 #endif
 
-#ifndef MENUS
-#define MENUS
+#ifndef __MENUS__
+#define __MENUS__
 #include "Menus.h"
 #endif
 
 // Render points
 
-void RenderScore (float score) {
+void RenderStats (float score, float fps) {
 
     // Initialize font
     ALLEGRO_FONT* titleFont = al_load_font("resources/fonts/AeroliteBold.otf", 36, 0);
 
     // Render score
     al_draw_textf (titleFont, al_map_rgb(255, 255, 255), 150, 75, 1, "SCORE: %d", (int) score);
+
+    // Render fps
+    al_draw_textf (titleFont, al_map_rgb(255, 255, 255), WINDOW_WIDTH - 150, 75, 1, "FPS: %d", (int) fps);
 
     // Clear font
     al_destroy_font(titleFont);

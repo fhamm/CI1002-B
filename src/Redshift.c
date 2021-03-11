@@ -9,24 +9,28 @@
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_acodec.h>
 
+#ifndef __CONSTANTS__
+#define __CONSTANTS__
+#include "Constants.h"
+#endif
 
-#ifndef CHUNKS
-#define CHUNKS
+#ifndef __CHUNKS__
+#define __CHUNKS__
 #include "Chunks.h"
 #endif
 
-#ifndef PHYSICS
-#define PHYSICS
+#ifndef __PHYSICS__
+#define __PHYSICS__
 #include "Physics.h"
 #endif
 
-#ifndef ENTITIES
-#define ENTITIES
+#ifndef __ENTITIES__
+#define __ENTITIES__
 #include "Entities.h"
 #endif
 
-#ifndef MENUS
-#define MENUS
+#ifndef __MENUS__
+#define __MENUS__
 #include "Menus.h"
 #endif
 
@@ -96,8 +100,9 @@ int main() {
     bool reset = false;
     bool done = false;
     bool redraw = true;
+    bool easterEgg = false;
     int frameCount = 0;
-    //float lastTimestamp = 0;
+    float lastTimestamp = al_get_time();
     ALLEGRO_EVENT event;
     //int mouseX, mouseY;
     
@@ -107,10 +112,14 @@ int main() {
     Chunk* chunk = GenerateChunk(time(NULL));
     EntityHandler* entities = InitializeEntities(chunk);
 
-    // Sound
+    // Sounds
     ALLEGRO_SAMPLE* backgroundMusic = al_load_sample("resources/sounds/main-music.wav");
     InitializeModule(backgroundMusic, "backgroundMusic");
-    al_play_sample(backgroundMusic, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
+    
+    ALLEGRO_SAMPLE* jumpSound = al_load_sample("resources/sounds/jump.wav");
+    InitializeModule(jumpSound, "jumpSound");
+
+    al_play_sample(backgroundMusic, 0.8, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
 
     // Keyboard stuff
     #define KEY_SEEN     1
@@ -155,8 +164,10 @@ int main() {
                     }
 
                     if (key[ALLEGRO_KEY_SPACE])
-                        if (player->jumping == 0)
+                        if (player->jumping == 0) {
                             player->jumping = 1;
+                            //al_play_sample(jumpSound, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+                        }
                 }
 
                 // Pause menu
@@ -164,8 +175,16 @@ int main() {
                     if (key[ALLEGRO_KEY_ESCAPE])
                         state = 1;
                     
-                    //if (key[ALLEGRO_KEY_F11])
-                    //    PlayRacaNegra();
+                    if (key[ALLEGRO_KEY_F11]) {
+                        if (easterEgg == false) {
+                            // Play easter egg song
+                            al_destroy_sample(backgroundMusic);
+                            backgroundMusic = al_load_sample("resources/sounds/music-full_of_habits.wav");
+                            InitializeModule(backgroundMusic, "backgroundMusic");
+                            al_play_sample(backgroundMusic, 0.8, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP, NULL);
+                            easterEgg = true;
+                        }
+                    }
                 }
 
                 // Game over
@@ -209,7 +228,11 @@ int main() {
             
             printf("Finishing game...\n");
             
+            // Destroy sounds
             al_destroy_sample(backgroundMusic);
+            al_destroy_sample(jumpSound);
+            
+            // Destroy all the rest
             FreeBackground(background);
             free(player);
             free(chunk);
@@ -217,10 +240,14 @@ int main() {
             break;
         }
 
+        float timestamp = al_get_time();
+        float deltaTime = timestamp - lastTimestamp;
+        float fps = 1.0 / deltaTime;
+        float score = frameCount / 10;
+
         if (redraw && al_is_event_queue_empty(queue)) {
 
-            float timestamp = al_get_time();
-            float score = frameCount / 10;
+            
 
             // Start menu state
             if (state == 0) {
@@ -237,10 +264,8 @@ int main() {
                     entities = InitializeEntities(chunk);
                 }
 
-                if (PlayerOutOfBounds(player) || PlayerCollisionCheck(player, entities)) {
-                    //lastTimestamp = timestamp;
+                if (PlayerOutOfBounds(player) || PlayerCollisionCheck(player, entities))
                     state = 3;
-                }
 
                 UpdatePlayerPhysics(player, entities, timestamp, frameCount);
                 RenderPlayer(player);
@@ -248,7 +273,7 @@ int main() {
                 RenderEntities(entities);
                 UpdateEntities(entities);
 
-                RenderScore(score);
+                RenderStats(score, fps);
 
                 frameCount++;
                 player->jumping = 0;
@@ -269,7 +294,8 @@ int main() {
             }
 
             redraw = false;
-            al_flip_display(); 
+            al_flip_display();
+            lastTimestamp = timestamp; 
         }
     }
 

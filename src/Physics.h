@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-#ifndef ENTITIES
-#define ENTITIES
+#ifndef __ENTITIES__
+#define __ENTITIES__
 #include "Entities.h"
 #endif
 

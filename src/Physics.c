@@ -2,13 +2,13 @@
 #include <stdlib.h>
 #include <math.h>
 
-#ifndef PHYSICS
-#define PHYSICS
+#ifndef __PHYSICS__
+#define __PHYSICS__
 #include "Physics.h"
 #endif
 
-#ifndef ENTITIES
-#define ENTITIES
+#ifndef __ENTITIES__
+#define __ENTITIES__
 #include "Entities.h"
 #endif
 

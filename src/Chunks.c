@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifndef CHUNKS
-#define CHUNKS
+#ifndef __CHUNKS__
+#define __CHUNKS__
 #include "Chunks.h"
 #endif
 
@@ -122,7 +122,60 @@ void Struct_ElevatedSpikes (int* block, Chunk* chunk) {
     }
 
     *block = i;
+}
 
+void Struct_Holes (int* block, Chunk* chunk) {
+
+    int i;
+
+    for (i = *block; (i < *block + STRUCTURE_SIZE) && (i < CHUNK_SIZE); i++) {
+        
+        if (i % 2 == 0)
+            chunk->rectangles[i] = 1;
+        else
+            chunk->rectangles[i] = 0;
+
+        chunk->triangles[i] = 0;
+        chunk->circles[i] = 0;
+    }
+
+    *block = i;
+}
+
+void Struct_ElevatedHoles (int* block, Chunk* chunk) {
+
+    int i;
+
+    for (i = *block; (i < *block + STRUCTURE_SIZE) && (i < CHUNK_SIZE); i++) {
+        
+        if (i % 2 == 0)
+            chunk->rectangles[i] = 9;
+        else
+            chunk->rectangles[i] = 0;
+
+        chunk->triangles[i] = 0;
+        chunk->circles[i] = 0;
+    }
+
+    *block = i;
+}
+
+void Struct_Saws (int* block, Chunk* chunk) {
+
+    int i;
+
+    for (i = *block; (i < *block + STRUCTURE_SIZE) && (i < CHUNK_SIZE); i++) {
+        
+        if (i % 2 == 0)
+           chunk->circles[i] = (rand() % 8) + 1;
+        else
+           chunk->circles[i] = 0;
+
+        chunk->triangles[i] = 0;
+        chunk->rectangles[i] = 1;
+    }
+
+    *block = i;
 }
 
 // ------------
@@ -138,25 +191,32 @@ Chunk* GenerateChunk (unsigned int seed) {
     Chunk* chunk = malloc(sizeof(Chunk));
 
     // This is the jump table (array of pointers) for the structure functions
-    StructFunction *StructList[6] = {
+    StructFunction *StructList[9] = {
         Struct_PlainArea, // 0
         Struct_StairsUp, // 1
         Struct_StairsDown, // 2
         Struct_ElevatedFloor, // 3
         Struct_Spikes, // 4
-        Struct_ElevatedSpikes // 5
+        Struct_ElevatedSpikes, // 5
+        Struct_Holes, // 6
+        Struct_ElevatedHoles, // 7
+        Struct_Saws // 8
     };
 
     // This is the constraint table.
     // It basically tells which structures (columns) are allowed to be placed
     // after a specific structure (row)
-    int ConstraintTable[6][6] = {
-        {0, 1, 4, -1, -1}, // 0
-        {0, 3, 5,-1, -1}, // 1
-        {0, 1, 4, -1, -1}, // 2
-        {0, 2, 3, 5,  -1}, // 3
-        {0, 1, 4, -1, -1}, // 4
-        {0, 2, 3,  5, -1}  // 5
+    int ConstraintTable[9][9] = {
+        {-1,  1,  4,  6,  8, -1, -1, -1, -1}, // 0
+        {0,  3,  5,  7, -1, -1, -1, -1, -1}, // 1
+        {0,  1,  4,  6,  8, -1, -1, -1, -1}, // 2
+        {0,  2,  -1,  5,  7, -1, -1, -1, -1}, // 3
+        {0,  1,  4,  6,  8, -1, -1, -1, -1}, // 4
+        {0,  2,  3,  5,  7, -1, -1, -1, -1}, // 5
+        {0,  1,  4,  6,  8, -1, -1, -1, -1}, // 6
+        {0,  2,  3,  5,  7, -1, -1, -1, -1}, // 7
+        {0,  1,  4,  6,  8, -1, -1, -1, -1}  // 8
+
     };
 
     // Generate chunk,
@@ -174,7 +234,7 @@ Chunk* GenerateChunk (unsigned int seed) {
         // Find next valid structure randomly
         int nextStructure = -1;
         while (nextStructure == -1) {
-            nextStructure = ConstraintTable[structure][rand() % 6];
+            nextStructure = ConstraintTable[structure][rand() % 9];
         }
 
         structure = nextStructure;

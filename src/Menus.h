@@ -6,7 +6,7 @@
 
 // Render points
 
-void RenderScore (float score);
+void RenderStats (float score, float fps);
 
 // Menu functions
 
