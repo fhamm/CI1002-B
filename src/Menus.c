@@ -172,7 +172,7 @@ void RenderGameOverMenu (float score) {
 int WriteScoreToLeaderboard (float score) {
 
     // Open file
-    FILE* leaderboardFile  = fopen("resources/data/leaderboard.txt", "ab+");
+    FILE* leaderboardFile  = fopen("resources/data/leaderboard.dat", "ab+");
 
     if (leaderboardFile == NULL)
         return 0;
@@ -211,7 +211,7 @@ int WriteScoreToLeaderboard (float score) {
 int LeaderboardHighScores (float* first, float* second, float* third) {
 
     // Open file
-    FILE* leaderboardFile = fopen("resources/data/leaderboard.txt", "r+");
+    FILE* leaderboardFile = fopen("resources/data/leaderboard.dat", "r+");
 
     if (leaderboardFile == NULL)
         return 0;

@@ -129,9 +129,12 @@ int main() {
     unsigned char key[ALLEGRO_KEY_MAX];
     memset(key, 0, sizeof(key));
 
+    // Hide mouse flag
+    if (HIDE_MOUSE != 0)
+        al_hide_mouse_cursor(disp);
+
     // Start stuff
     al_grab_mouse(disp);
-    al_hide_mouse_cursor(disp);
     al_start_timer(timer);
     
     printf("Initialization successful!\n");
@@ -248,8 +251,6 @@ int main() {
         float score = frameCount / 10;
 
         if (redraw && al_is_event_queue_empty(queue)) {
-
-            
 
             // Start menu state
             if (state == 0) {
