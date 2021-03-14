@@ -1,3 +1,4 @@
+// GRR20200070 - Felipe Hamm
 #ifndef __ENVIRONMENT_VARS__
 
 #define GAME_FPS 60 // Refresh rate of the game, in FPS
